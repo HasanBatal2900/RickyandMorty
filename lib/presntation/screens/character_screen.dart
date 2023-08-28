@@ -3,9 +3,10 @@ import 'dart:developer';
 import 'package:breaking_bad/buisness_logic/cubit/charaters_cubit.dart';
 import 'package:breaking_bad/constants/colors.dart';
 import 'package:breaking_bad/data/models/characters.dart';
+import 'package:breaking_bad/presntation/widgets/NoInternet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_offline/flutter_offline.dart';
 import '../widgets/characterItem.dart';
 
 class CharacterScreen extends StatefulWidget {
@@ -26,6 +27,24 @@ class _CharacterScreenState extends State<CharacterScreen> {
       controller.clear();
       showSearchBar = false;
     });
+  }
+
+  Widget buildBlocWidget() {
+    return BlocBuilder<CharactersCubit, CharactersState>(
+      builder: (context, state) {
+        if (state is CharactersLoaded) {
+          allCharacters = state.characters;
+          return buildLoadedItmes(context, allCharacters);
+        } else {
+          return const Align(
+            alignment: Alignment.bottomCenter,
+            child: LinearProgressIndicator(
+              color: ColorSys.myYellow,
+            ),
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -143,20 +162,23 @@ class _CharacterScreenState extends State<CharacterScreen> {
                 ],
               ),
       ),
-      body: BlocBuilder<CharactersCubit, CharactersState>(
-        builder: (context, state) {
-          if (state is CharactersLoaded) {
-            allCharacters = state.characters;
-            return buildLoadedItmes(context, allCharacters);
+      body: OfflineBuilder(
+        connectivityBuilder: (
+          BuildContext context,
+          ConnectivityResult connectivity,
+          Widget child,
+        ) {
+          final bool connected = connectivity != ConnectivityResult.none;
+
+          if (connected) {
+            return buildBlocWidget();
           } else {
-            return const Align(
-              alignment: Alignment.bottomCenter,
-              child: LinearProgressIndicator(
-                color: ColorSys.myYellow,
-              ),
-            );
+            return const NoInternetMessage();
           }
         },
+        child: const CircularProgressIndicator(
+          color: Colors.deepOrange,
+        ),
       ),
     );
   }

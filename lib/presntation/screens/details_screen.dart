@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+
 class DetailScreen extends StatefulWidget {
   const DetailScreen({super.key, required this.character});
 
